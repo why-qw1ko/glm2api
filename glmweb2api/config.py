@@ -16,9 +16,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 # 上游基址默认值。末尾统一去掉斜杠，避免拼接出双斜杠。
 DEFAULT_GLM_BASE_URL = "https://chatglm.cn/chatglm"
 
-# 签名密钥。上游未公开该值，属于"协议指纹"而非真正的安全措施；
-# 上游若轮换此值，对话会开始被拒，届时通过 GLM_SIGN_SECRET 覆盖即可。
-DEFAULT_SIGN_SECRET = "8a1317a7468aa3ad86e997d08f3f31cb"
+# 签名密钥（必填）。这是 chatglm.cn 网页端 JS 里可提取的共享"协议指纹"，并非个人凭据；
+# 为不将其写入仓库，默认留空，必须在 .env 中通过 GLM_SIGN_SECRET 注入，否则签名无效、上游会拒绝请求。
 
 # 对话用 assistant_id：社区里"默认对话助手"对应的 id。
 DEFAULT_CHAT_ASSISTANT_ID = "65940acff94777010aa6b796"
@@ -59,7 +58,7 @@ class Settings(BaseSettings):
 
     # ---- 上游 ----
     glm_base_url: str = DEFAULT_GLM_BASE_URL
-    glm_sign_secret: str = DEFAULT_SIGN_SECRET
+    glm_sign_secret: str = ""
     glm_timeout: float = 120.0
 
     # ---- agent 模式（可选，走 agentmore.chatglm.cn 的 Agent 后端）----

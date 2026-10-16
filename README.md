@@ -111,6 +111,7 @@ curl http://127.0.0.1:8788/v1/chat/completions \
 |---|---|
 | `HOST` / `PORT` | 监听地址与端口（默认 127.0.0.1:8788） |
 | `GLM_BASE_URL` | 上游基址 |
+| `GLM_SIGN_SECRET` | 上游签名密钥（**必填**，chatglm.cn 网页端 JS 里的共享协议指纹，需从 `.env` 注入） |
 | `GLM_AGENT_MODE` | 是否默认走 agentmore 的 Agent 后端（内置工具 + 联网），默认 false；面板"聊天"页可在对话/Agent 双模式间切换 |
 | `GLM_REFRESH_TOKEN` | 单个账号 refresh_token |
 | `GLM_TOKEN_FILE` | 多账号 token 文件 |

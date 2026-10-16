@@ -5,7 +5,7 @@
 
 import hashlib
 
-from glmweb2api.config import DEFAULT_SIGN_SECRET
+from glmweb2api.config import get_settings
 from glmweb2api.upstream.auth import build_headers, build_sign
 
 
@@ -18,11 +18,12 @@ def _expected_timestamp(now_ms: int) -> str:
 
 
 def test_build_sign_matches_checksum_rule():
+    secret = get_settings().glm_sign_secret
     for now_ms in [1792116502978, 1700000000000, 1234567890123, 1999999999999]:
         sign, timestamp, nonce = build_sign(now_ms)
         assert timestamp == _expected_timestamp(now_ms)
         assert len(nonce) == 32
-        assert sign == hashlib.md5(f"{timestamp}-{nonce}-{DEFAULT_SIGN_SECRET}".encode()).hexdigest()
+        assert sign == hashlib.md5(f"{timestamp}-{nonce}-{secret}".encode()).hexdigest()
 
 
 def test_build_headers_contains_required_keys():
