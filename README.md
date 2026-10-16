@@ -2,6 +2,14 @@
 
 把 `chatglm.cn` 网页端接口转换为多种客户端协议的本地反代服务。
 
+注意！！！！！
+
+> 不支持调用工具，但是可以调用联网工具做事，类似于调用python去计算值等
+> 不是反代出来就能使用ClaudeCode去写代码了
+> 自行试验吧，当知道无法调用工具的时候，这个项目已经没有可进行下去的必要了
+
+
+
 支持：
 
 - `POST /v1/chat/completions`（OpenAI，含流式）
@@ -11,7 +19,6 @@
 - `POST /v1/images/generations`（图片生成）
 - `GET /v1/models`、`GET /healthz`
 
-可以接入 OpenAI SDK、Claude Code、Cherry Studio、LobeChat、Open WebUI 等兼容客户端。
 
 > 本服务通过网页端接口访问智谱清言，绕过官方 API 计量，可能违反其用户协议，
 > 存在限流或封号风险。官方等价方案是 open.bigmodel.cn 的付费 API。请自行评估，
@@ -221,9 +228,3 @@ python scripts/check_panel_ui.py
 ```
 
 浏览器验收截图保存在 `data/ui-check/`。官方真实扫码最终确认及实际模型对话需要本人账号参与；离线测试不能证明官方账号额度或实时可用性。
-
-### 本次修改的验证范围
-
-按要求，本次 Windows 风格、主题、启动方式、取消游客模式及 Cookie 登录修复仅做源码审阅，未运行测试、构建、浏览器验收或真实扫码。此前测试结果不能代表本次修改的验证结果。
-
-参考项目 [workbuddy2api-panel](https://github.com/linguo2625469/workbuddy2api-panel/blob/main/internal/panel/login.go) 使用官方设备授权：获取 state/authUrl，再轮询官方 token 接口。清言公开脚本中尚未确认等价的第三方设备授权流程，本次保留受控浏览器登录，不加入扩展。
