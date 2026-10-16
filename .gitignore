@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+data/
+build/
+*.egg-info/
+# 残留的嵌套 git 元数据（不属于本仓库）
+glm2api/

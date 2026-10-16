@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GLM · 控制台</title><script src="/panel/assets/theme.js"></script><link rel="stylesheet" href="/panel/assets/style.css"><script src="/panel/assets/app.js" defer></script></head>
+<body>
+<button class="theme-toggle login-theme" type="button" data-theme-toggle aria-label="切换深色主题" title="切换深色主题"><span class="fluent-icon icon-weather_moon" aria-hidden="true"></span></button>
+<div id="login-view" class="login-layout">
+ <form id="login-form" class="login-card">
+  <div class="app-icon"><span class="fluent-icon icon-plug_connected" aria-hidden="true"></span></div><div class="eyebrow">GLMWEB2API</div>
+  <h1>登录 GLM 控制台</h1><p class="muted">登录控制台，管理反代、账号与每一次调用。</p>
+  <label>管理员密码<input name="password" type="password" autocomplete="current-password" required maxlength="256" placeholder="输入管理员密码"></label>
+  <button class="primary wide" type="submit">登录控制台 <span class="fluent-icon icon-arrow_right" aria-hidden="true"></span></button>
+  <p class="small muted">首次使用：读取服务器数据目录中的 panel-bootstrap.txt，或使用部署时设置的 PANEL_PASSWORD。</p>
+  <p id="login-error" class="error" role="alert"></p>
+ </form><div class="login-caption">一个入口，连接你的 AI 工作流。</div>
+</div>
+<div id="app" class="shell" hidden>
+ <aside class="sidebar">
+  <a class="brand" href="/panel/"><span class="app-icon small-icon"><span class="fluent-icon icon-plug_connected" aria-hidden="true"></span></span><span>GLM Console<small>WEB TO API</small></span></a>
+  <div class="nav-caption">工作空间</div>
+  <nav aria-label="主导航">
+   <button data-page="overview" class="nav-item selected"><span class="fluent-icon icon-home" aria-hidden="true"></span>总览</button>
+   <button data-page="chat" class="nav-item"><span class="fluent-icon icon-sparkle" aria-hidden="true"></span>聊天</button>
+   <button data-page="usage" class="nav-item"><span class="fluent-icon icon-data_histogram" aria-hidden="true"></span>用量与日志</button>
+   <button data-page="accounts" class="nav-item"><span class="fluent-icon icon-people" aria-hidden="true"></span>上游账号</button>
+   <button data-page="keys" class="nav-item"><span class="fluent-icon icon-key" aria-hidden="true"></span>API 密钥</button>
+   <div class="nav-caption">服务与工具</div>
+   <button data-page="config" class="nav-item"><span class="fluent-icon icon-settings" aria-hidden="true"></span>反代配置</button>
+   <button data-page="test" class="nav-item"><span class="fluent-icon icon-play" aria-hidden="true"></span>调用测试</button>
+   <button data-page="connect" class="nav-item"><span class="fluent-icon icon-plug_connected" aria-hidden="true"></span>客户端接入</button>
+   <button data-page="audit" class="nav-item"><span class="fluent-icon icon-history" aria-hidden="true"></span>变更记录</button>
+  </nav>
+  <div class="sidebar-bottom"><div class="service-badge"><i></i><span>本地管理服务<small id="sidebar-status">正在连接</small></span></div><button id="logout" class="quiet"><span class="fluent-icon icon-sign_out" aria-hidden="true"></span>退出登录</button></div>
+ </aside>
+ <main>
+  <header class="topbar"><div class="breadcrumb">工作空间 <span>/</span> <b id="breadcrumb">总览</b></div><div class="topbar-right"><span id="updated" class="muted small"></span><button id="refresh" class="secondary compact" aria-label="刷新数据"><span class="fluent-icon icon-arrow_clockwise" aria-hidden="true"></span>刷新</button><button class="theme-toggle" type="button" data-theme-toggle aria-label="切换深色主题" title="切换深色主题"><span class="fluent-icon icon-weather_moon" aria-hidden="true"></span></button><span class="avatar" title="管理员"><span class="fluent-icon icon-person" aria-hidden="true"></span></span><button id="logout-mobile" class="quiet mobile-only">退出</button></div></header>
+  <div class="page-content">
+   <div class="page-heading"><div><div class="eyebrow">GLMWEB2API / CONTROL CENTER</div><h1 id="page-title">服务总览</h1><p id="page-description" class="muted">每一次调用，都清晰可见。</p></div><span class="pill">管理员工作空间</span></div>
+   <div id="page-error" class="notice danger" role="alert" hidden></div>
+   <section id="page-overview" class="page">
+    <div id="warnings"></div>
+    <div class="hero-strip"><div><span class="status-dot"></span><b id="service-state">正在读取账号状态</b><p class="muted">统一连接 OpenAI、Anthropic 与 Gemini 客户端</p></div><div class="hero-meta"><span id="uptime">—</span><small>持续运行</small></div></div>
+    <div class="metric-grid" id="overview-metrics"></div>
+    <div class="two-columns"><article class="card"><div class="card-head"><div><h2>调用趋势</h2><p class="muted small">今日每小时请求 · 北京时间</p></div><span class="pill">今日</span></div><div id="overview-chart" class="chart"></div></article><article class="card"><div class="card-head"><h2>运行概况</h2><span class="blue-label">LIVE</span></div><dl id="runtime-info" class="detail-list"></dl></article></div>
+    <article class="card"><div class="card-head"><div><h2>最近调用</h2><p class="muted small">不保存提示词和回答正文</p></div><button class="quiet" data-go="usage">查看全部 <span class="fluent-icon icon-arrow_right" aria-hidden="true"></span></button></div><div id="recent-table" class="table-wrap"></div></article>
+    <p class="footnote">Token 为本服务按文本估算，包含思考输出；不代表官方账单。官方剩余额度目前未知。</p>
+   </section>
+   <section id="page-chat" class="page chat-page" hidden>
+    <div class="card chat-card">
+     <div class="chat-head">
+      <div><h2>AI 聊天</h2><p id="chat-mode-note" class="muted small">正在读取配置…</p></div>
+      <div class="chat-controls">
+       <label>模型<select id="chat-model" name="model"></select></label>
+       <div class="mode-switch" role="group" aria-label="切换对话 / Agent 模式">
+        <button type="button" id="mode-chat" class="mode-option">对话</button>
+        <button type="button" id="mode-agent" class="mode-option">Agent</button>
+       </div>
+       <button id="chat-clear" class="secondary compact" type="button">清空</button>
+      </div>
+     </div>
+     <div id="chat-log" class="chat-log" aria-live="polite"></div>
+     <div class="chat-input-row">
+      <textarea id="chat-input" rows="1" maxlength="16000" placeholder="输入消息，Enter 发送，Shift+Enter 换行"></textarea>
+      <button id="chat-send" class="primary" type="button">发送</button>
+     </div>
+     <p id="chat-status" class="muted small chat-status"></p>
+    </div>
+   </section>
+   <section id="page-usage" class="page" hidden>
+    <form id="usage-filter" class="card filters"><label>开始时间<input type="datetime-local" name="since" required></label><label>结束时间<input type="datetime-local" name="until" required></label><label>模型<input name="model" placeholder="全部模型" maxlength="160"></label><label>协议<select name="protocol"><option value="">全部协议</option><option>openai</option><option>responses</option><option>anthropic</option><option>gemini</option><option>images</option><option>panel-test</option><option>panel-chat</option></select></label><label>密钥<select name="key_id" id="filter-key"><option value="">全部密钥</option></select></label><label>结果<select name="outcome"><option value="">全部结果</option><option value="success">成功</option><option value="failed">失败</option><option value="cancelled">中断</option></select></label><button class="primary" type="submit">查询</button></form>
+    <div class="metric-grid" id="usage-metrics"></div><article class="card"><h2>请求趋势</h2><div id="usage-chart" class="chart"></div></article>
+    <article class="card"><div class="card-head"><h2>请求明细</h2><span class="muted small">每页 50 条 · Token 为估算值</span></div><div id="usage-table" class="table-wrap"></div><div class="pagination"><button id="usage-prev" class="secondary">上一页</button><span id="usage-page"></span><button id="usage-next" class="secondary">下一页</button></div></article>
+    <article class="card"><h2>模型 / 协议 / 密钥汇总（最多 100 组）</h2><div id="usage-groups" class="table-wrap"></div></article>
+   </section>
+   <section id="page-accounts" class="page" hidden>
+    <div class="two-columns"><article class="card"><span class="feature-icon"><span class="fluent-icon icon-person" aria-hidden="true"></span></span><h2>连接官方账号</h2><p class="muted">在官方页面完成登录，自动保存 refresh_token 并接入反代。</p><div class="actions"><button id="login-local" class="primary">本机浏览器登录</button><button id="login-remote" class="secondary">远程扫码登录</button></div><p class="small muted">本机方式在服务所在电脑打开浏览器。Docker 请使用远程模式，在下方官方页面选择扫码。</p></article>
+    <form id="import-form" class="card"><h2>手动导入</h2><p class="muted">已有凭据可直接接入；保存成功后立即生效。</p><label>Refresh Token<input name="refresh_token" type="password" autocomplete="off" required maxlength="16384" placeholder="粘贴官方账号的 refresh_token"></label><button class="secondary" type="submit">保存并接入</button></form></div>
+    <article id="official-login" class="card" hidden><div class="card-head"><div><h2>官方登录会话</h2><p id="official-status" class="muted" role="status" aria-live="polite"></p></div><button id="cancel-login" class="secondary">取消登录</button></div><p id="official-help" class="small muted">以下是服务器浏览器中的官方页面。可点击登录入口或扫码选项；二维码有效期以官方页面为准。</p><div id="official-qr-box" class="qr-box" hidden><img id="official-qr" alt="官方微信登录二维码"><p class="muted small">使用微信扫描官方二维码<br>如尚未加载或已过期，请查看下方官方页面或重新发起登录。</p></div><button id="official-image-button" class="screenshot-button" aria-label="点击官方登录页面；也可在本机浏览器完成登录"><img id="official-image" alt="官方登录页面，等待加载" hidden></button></article>
+    <article class="card"><div class="card-head"><h2>账号列表</h2><span class="pill">凭据仅脱敏显示</span></div><div id="accounts-table" class="table-wrap"></div><p class="footnote">健康检查验证 Token 刷新能力，不保证对话额度。缓存截止时间不是官方 Token 到期时间。</p></article>
+   </section>
+   <section id="page-keys" class="page" hidden>
+    <form id="key-form" class="card inline-form"><div><h2>创建调用密钥</h2><p class="muted small">为每个客户端分配独立密钥，分别统计和禁用。</p></div><label>名称<input name="name" required maxlength="80" placeholder="例如：我的 Cherry Studio"></label><button type="submit" class="primary">创建密钥</button></form>
+    <article id="new-key-box" class="notice" hidden><b>密钥只显示这一次，请立即保存。</b><code id="new-key"></code><div class="actions"><button id="copy-key" class="secondary">复制密钥</button><button id="dismiss-key" class="quiet">已保存，隐藏</button></div></article>
+    <article class="card"><h2>调用密钥</h2><p id="env-keys" class="muted small"></p><div id="keys-table" class="table-wrap"></div></article>
+   </section>
+   <section id="page-config" class="page" hidden>
+    <div class="notice">配置修改在没有进行中请求和登录时立即生效。环境变量 / .env 指定的项目会锁定；监听地址和端口需要修改部署配置并重启。</div>
+    <form id="config-form" class="card"><div class="card-head"><h2>反代与运行配置</h2><span class="pill">保存前预览变更</span></div><div id="config-fields" class="form-grid"></div><div class="actions"><button class="primary" type="submit">预览并保存</button></div></form>
+    <form id="password-form" class="card"><h2>修改管理员密码</h2><div class="form-grid"><label>当前密码<input type="password" name="current_password" autocomplete="current-password" required maxlength="256"></label><label>新密码<input type="password" name="password" autocomplete="new-password" minlength="12" maxlength="256" required placeholder="至少 12 个字符"></label></div><button type="submit" class="secondary">修改并重新登录</button><p id="password-note" class="muted small"></p></form>
+   </section>
+   <section id="page-test" class="page" hidden>
+    <div class="notice">测试会发起真实上游请求，并计入“panel-test”用量。测试正文仅在当前页面展示。</div>
+    <form id="test-form" class="card"><div class="form-grid"><label>模型<select id="test-model" name="model"></select></label></div><label>输入内容<textarea name="prompt" rows="5" required maxlength="16000" placeholder="输入一条消息，测试模型连通性和流式输出。"></textarea></label><div class="actions"><button id="send-test" class="primary" type="submit">发送测试</button><button id="stop-test" class="secondary" type="button" disabled>停止</button><span id="test-status" class="muted small"></span></div></form>
+    <article class="card"><h2>响应</h2><details><summary>思考内容</summary><pre id="test-reasoning" class="response-text"></pre></details><pre id="test-output" class="response-text">等待发送测试。</pre><p id="test-usage" class="muted small"></p></article>
+   </section>
+   <section id="page-connect" class="page" hidden>
+    <article class="card"><h2>一个服务，多种协议</h2><p class="muted">将下方地址填入客户端。远程使用时，填写你的 HTTPS 域名。</p><div id="endpoints" class="endpoint-list"></div></article>
+    <article class="card"><div class="form-grid"><label>客户端<select id="client-type"><option value="openai">OpenAI Python SDK</option><option value="claude">Claude Code</option><option value="curl">curl</option><option value="cherry">Cherry Studio / Open WebUI</option><option value="gemini">Gemini HTTP</option></select></label><label>外部服务地址<input id="client-base" type="url"></label><label>调用密钥（仅当前页面使用）<input id="client-key" type="password" autocomplete="off" placeholder="YOUR_API_KEY"></label></div><div class="card-head"><h2>接入示例</h2><button id="copy-client" class="secondary">复制配置</button></div><pre id="client-code" class="code-block"></pre></article>
+   </section>
+   <section id="page-audit" class="page" hidden><article class="card"><h2>配置与管理操作记录</h2><p class="muted small">记录字段及操作结果，不保存秘密值。</p><div id="audit-table" class="table-wrap"></div><div class="pagination"><button id="audit-prev" class="secondary">上一页</button><span id="audit-page"></span><button id="audit-next" class="secondary">下一页</button></div></article></section>
+  </div><footer>GLMWEB2API <span>·</span> 为你的工作流而连接</footer>
+ </main>
+</div>
+<dialog id="confirm-dialog"><h2 id="confirm-title">确认操作</h2><pre id="confirm-detail"></pre><div class="actions"><button id="confirm-cancel" class="secondary">取消</button><button id="confirm-ok" class="primary">确认</button></div></dialog>
+<div id="toast" role="status" hidden></div>
+</body></html>

@@ -1,0 +1,24 @@
+services:
+  glmweb2api:
+    build:
+      context: .
+      args:
+        INSTALL_BROWSER: "${INSTALL_BROWSER:-true}"
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${PORT:-8788}:8788"
+    env_file:
+      - .env
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "8788"
+      PANEL_OPEN_BROWSER: "false"
+      PANEL_DATA_DIR: /app/data
+      GLM_TOKEN_FILE: /app/data/refresh_tokens.json
+    volumes:
+      - glm-data:/app/data
+    shm_size: 256mb
+    init: true
+    restart: unless-stopped
+
+volumes:
+  glm-data:

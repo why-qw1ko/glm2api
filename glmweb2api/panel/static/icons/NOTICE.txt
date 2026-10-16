@@ -1,0 +1,5 @@
+@fluentui/svg-icons 1.1.344
+Microsoft Fluent UI System Icons
+MIT License; original license included in LICENSE.txt
+https://github.com/microsoft/fluentui-system-icons
+SVG files copied unchanged from the official npm package.

@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "glmweb2api"
+version = "0.1.0"
+description = "把 chatglm.cn 网页端接口转换为多种客户端协议的本地反代服务"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "httpx>=0.27",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+]
+
+[project.optional-dependencies]
+# 浏览器自动登录/刷新。生产环境若只用「手动导入 refresh_token」模式，
+# 可以不装这一组 —— 它会把 Chromium 一起拉下来，镜像体积和安装时间都显著增加。
+browser = ["playwright>=1.48"]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+]
+
+[project.scripts]
+glmweb2api = "glmweb2api.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["glmweb2api*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.setuptools.package-data]
+"glmweb2api.panel" = ["static/*.html", "static/*.css", "static/*.js", "static/icons/*.svg", "static/icons/*.txt"]
